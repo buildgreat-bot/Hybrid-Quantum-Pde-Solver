@@ -35,5 +35,32 @@ make cuda
 # Run TGV at Re=100
 python examples/run_tgv_re100.py
 
+
+---
+
+## The TGV Config (`plugins/taylor_green_vortex.py`)
+
+```python
+"""
+Taylor-Green Vortex configuration for Airbus Challenge.
+10-line PDE profile.
+"""
+
+CONFIG = {
+    "name": "taylor_green_vortex",
+    "dimension": 2,
+    "domain_length": 6.28318530718,  # 2*pi
+    "grid_size": 64,  # N x N
+    "vortex_velocity": 1.0,  # V0
+    "convection_x": 1.0,  # Uc
+    "convection_y": 0.0,  # Vc
+    "density": 1.0,  # rho
+    "reynolds_number": 100,  # Re
+    "background_pressure": 0.0,  # p0
+    "time_step": 0.001,  # dt
+    "final_time": 1.0,  # t_final
+    "viscosity": lambda cfg: cfg["vortex_velocity"] * cfg["domain_length"] / cfg["reynolds_number"],
+}
+
 # Profile with Nsight
 make profile RE=100
