@@ -38,5 +38,5 @@ This project explores a **hybrid approach**:
 
 Everything is under active development. Expect breaking changes.
 
-# Example (not yet functional)
+
 python examples/run_tgv_re100.py
