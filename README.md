@@ -1,66 +1,42 @@
-# Hybrid Quantum PDE Solver
+# Hybrid Quantum-Classical PDE Solver
 
-Hybrid classical-quantum PDE solver with hand-optimized CUDA kernels for quantum matrix inversion.
+**A modular hybrid engine for solving discretized PDEs with classical + quantum (PennyLane + CUDA) components.**
 
-**Author:** [Your Name]  
-**Institution:** [Your College]  
-**Challenge:** Airbus Global Quantum + AI Challenge 2026
+## Aim
+Engineering problems in heat transfer, fluid dynamics, and aerodynamics require solving large linear systems from discretized PDEs. Classical methods struggle with memory and time at high resolution.  
 
-## Architecture
+This project explores a **hybrid approach**:  
+- Classical CPU layer handles grid discretization and physics assembly.  
+- Quantum/GPU layer accelerates the linear solve via amplitude encoding and unitary methods.  
+- Goal: Demonstrate practical hybrid workflows, scaling behavior, and validation for benchmarks like the 2D Taylor-Green Vortex (relevant to Airbus challenge).
 
-| Layer | Hardware | Role |
-|-------|----------|------|
-| Classical | CPU | Grid setup, matrix A + vector b assembly |
-| Quantum (PennyLane) | GPU | Amplitude encoding, unitary dilation |
-| Quantum (Custom CUDA) | GPU | Hand-written kernels for bottlenecks |
+**Current Status**: Early construction / prototype phase. Core architecture defined, basic flow partially implemented. Not production-ready.
 
-## CUDA Optimization
+## Architecture Overview
 
-- **Amplitude encoding:** Custom kernel with coalesced memory access
-- **Unitary application:** Shared memory tiling
-- **Reductions:** Warp-shuffle L2 norm
+**Key Layers**:
+- **Input/Config**: PDE-specific plug-ins (e.g., `taylor_green_vortex.py`) define parameters (N, dt, Re).
+- **Classical Setup**: Grid generation, stencil computation, assembly of sparse Matrix A and vector b.
+- **Quantum Solve**: Amplitude encoding + unitary dilation solve on GPU (PennyLane Lightning + custom CUDA kernels for performance).
+- **Post-Processing**: Physical field reconstruction, L2 error vs. analytic solution, plots.
+- **Benchmarking**: CPU vs GPU comparison, memory bandwidth, occupancy analysis with Nsight.
 
-| Metric | PennyLane Default | Custom CUDA | Speedup |
-|--------|-----------------|-------------|---------|
-| Encode (N=4096) | TBD | TBD | TBD |
-| Inversion (N=4096) | TBD | TBD | TBD |
-| Memory bandwidth | TBD | TBD | — |
+## Project Structure (High-Level)
+- `plugins/` — Domain-specific PDE configurations
+- `src/classical/` — Grid, stencils, assembly
+- `src/quantum/` — Encoding, solving, circuit setup
+- `src/cuda/kernels/` — Hand-optimized CUDA kernels
+- `benchmarks/` — Performance comparisons and profiling
+- `examples/` — End-to-end run scripts
+- `tests/` — Validation against analytic solutions
 
-## Run
+## Current Progress
+- Architecture and data flow fully designed.
+- Core classical layers and basic PennyLane integration in progress.
+- Custom CUDA kernels planned for performance optimization.
+- Taylor-Green Vortex plug-in and benchmarking framework targeted next.
 
-```bash
-# Compile CUDA kernels
-make cuda
+Everything is under active development. Expect breaking changes.
 
-# Run TGV at Re=100
+# Example (not yet functional)
 python examples/run_tgv_re100.py
-
-
----
-
-## The TGV Config (`plugins/taylor_green_vortex.py`)
-
-```python
-"""
-Taylor-Green Vortex configuration for Airbus Challenge.
-10-line PDE profile.
-"""
-
-CONFIG = {
-    "name": "taylor_green_vortex",
-    "dimension": 2,
-    "domain_length": 6.28318530718,  # 2*pi
-    "grid_size": 64,  # N x N
-    "vortex_velocity": 1.0,  # V0
-    "convection_x": 1.0,  # Uc
-    "convection_y": 0.0,  # Vc
-    "density": 1.0,  # rho
-    "reynolds_number": 100,  # Re
-    "background_pressure": 0.0,  # p0
-    "time_step": 0.001,  # dt
-    "final_time": 1.0,  # t_final
-    "viscosity": lambda cfg: cfg["vortex_velocity"] * cfg["domain_length"] / cfg["reynolds_number"],
-}
-
-# Profile with Nsight
-make profile RE=100
