@@ -37,6 +37,6 @@ This project explores a **hybrid approach**:
 - Taylor-Green Vortex plug-in and benchmarking framework targeted next.
 
 Everything is under active development. Expect breaking changes.
-
-
+***this is the skeleton of the project .... 
+    the engine logic ... and all the other things are getting mapped and are under test . Once it passes the primary requirements the code will be pushed 
 
